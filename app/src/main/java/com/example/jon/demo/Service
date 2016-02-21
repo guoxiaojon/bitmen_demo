@@ -1,0 +1,88 @@
+import java.net.*;
+import java.io.*;
+
+public class Service{
+	public static void main(String[] args)throws Exception{
+		
+		
+		while(true){
+			ServerSocket ss = new ServerSocket(10003);
+			
+			System.out.print("sssssssssssss+"+"\n");
+			Socket s = ss.accept();
+			System.out.print("mmmmmmmssss+"+"\n");
+			InputStream ips = s.getInputStream();
+			int len;
+			StringBuilder sb = new StringBuilder();
+			byte[] buf = new byte[1024];
+			
+			
+			while((len = ips.read(buf)) != -1){
+				sb.append(new String(buf,0,len));
+				System.out.print(new String(buf,0,len)+"\n");
+			}
+			
+			
+			String temp = sb.toString();
+			
+			
+		
+		
+			if(temp.charAt(0) == '&'){
+				String saveString = temp.substring(1);
+			
+				write2File(saveString);
+			}else{
+				
+				String filename = sb.toString();
+				
+				s.close();
+				ss.close();
+				
+				ss = new ServerSocket(10003);
+				s = ss.accept();
+				
+				
+				OutputStream out = s.getOutputStream();
+		
+				System.out.print("sssssssssssss+"+filename+len+"\n");
+				write2Client(filename,out);
+			}
+			s.close();
+			ss.close();
+		}
+		
+		//
+	}
+	
+	
+	private static void write2File(String saveString)throws Exception{
+		String[] arr = saveString.split("\\&");
+		String filename = arr[0];
+		String content = arr[1];
+		File file = new File("E:\\"+filename);
+		file.createNewFile();
+		OutputStream ops = new FileOutputStream(file);
+		ops.write(content.getBytes());
+		ops.flush();
+		ops.close();
+	}
+	
+	private static void write2Client(String filename,OutputStream out)throws Exception{
+		File file = new File("E:\\"+filename);
+		System.out.print(file+"");
+		if(file.exists()){
+			InputStream ips = new FileInputStream(file);
+			int len;
+			byte[] buf = new byte[1024];
+			while((len = ips.read(buf)) != -1){
+				System.out.print("one times");
+				out.write(buf,0,len);
+				out.flush();
+			}
+			System.out.print("jie shu le");
+			out.close();
+			ips.close();
+		}
+	}
+}
